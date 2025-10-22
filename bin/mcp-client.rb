@@ -3,6 +3,7 @@
 require 'json'
 require 'net/http'
 require 'uri'
+require 'dotenv/load'
 
 # Configuration
 RAILS_API_URL = ENV['RAILS_API_URL']
@@ -10,13 +11,18 @@ API_KEY = ENV['RAILS_API_KEY']
 
 class RailsMCPClient
   def initialize
-    @api_uri = URI.join(RAILS_API_URL, '/api/v1/mcp')
-    @api_key = API_KEY
-    
-    unless @api_key
+    unless RAILS_API_URL
+      STDERR.puts "ERROR: RAILS_API_URL environment variable is required"
+      exit 1
+    end
+
+    unless API_KEY
       STDERR.puts "ERROR: RAILS_API_KEY environment variable is required"
       exit 1
     end
+
+    @api_uri = URI.join(RAILS_API_URL, '/api/v1/mcp')
+    @api_key = API_KEY
   end
 
   def run
