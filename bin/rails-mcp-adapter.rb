@@ -3,7 +3,6 @@
 require 'json'
 require 'net/http'
 require 'uri'
-require 'dotenv/load'
 
 # Configuration
 RAILS_API_URL = ENV['RAILS_API_URL']
