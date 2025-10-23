@@ -1,16 +1,16 @@
 #!/bin/sh
 set -e
 
-REPO="YOUR_USERNAME/your-rails-mcp-server"
+REPO="hellohello/sop-mcp-client"
 INSTALL_DIR="${HOME}/.local/bin"
-SCRIPT_NAME="my-rails-mcp-server"
+SCRIPT_NAME="rails-mcp-adapter.rb"
 
 error() {
     echo "Error: $1" >&2
     exit 1
 }
 
-echo "Installing Rails MCP Server client..."
+echo "Installing Rails MCP Adapter..."
 
 # Check for Ruby
 if ! command -v ruby >/dev/null 2>&1; then
@@ -33,7 +33,7 @@ chmod +x "${INSTALL_DIR}/${SCRIPT_NAME}"
 
 # Verify installation
 if [ -x "${INSTALL_DIR}/${SCRIPT_NAME}" ]; then
-    echo "✨ Successfully installed Rails MCP Server client to ${INSTALL_DIR}/${SCRIPT_NAME}"
+    echo "✨ Successfully installed Rails MCP Adapter to ${INSTALL_DIR}/${SCRIPT_NAME}"
     echo
     echo "Configuration Required:"
     echo "  RAILS_API_URL - Your Render app URL (e.g., https://your-app.onrender.com)"

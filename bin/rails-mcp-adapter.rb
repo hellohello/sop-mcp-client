@@ -9,7 +9,7 @@ require 'dotenv/load'
 RAILS_API_URL = ENV['RAILS_API_URL']
 API_KEY = ENV['RAILS_API_KEY']
 
-class RailsMCPClient
+class RailsMCPAdapter
   def initialize
     unless RAILS_API_URL
       STDERR.puts "ERROR: RAILS_API_URL environment variable is required"
@@ -29,7 +29,7 @@ class RailsMCPClient
     STDOUT.sync = true
     STDERR.sync = true
     
-    STDERR.puts "Rails MCP Client starting..."
+    STDERR.puts "Rails MCP Adapter starting..."
     STDERR.puts "Connecting to: #{RAILS_API_URL}"
     
     # Read JSON-RPC requests from stdin and forward to Rails
@@ -109,5 +109,5 @@ class RailsMCPClient
   end
 end
 
-# Run the client
-RailsMCPClient.new.run if __FILE__ == $PROGRAM_NAME
+# Run the adapter
+RailsMCPAdapter.new.run if __FILE__ == $PROGRAM_NAME
