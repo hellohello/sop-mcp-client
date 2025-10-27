@@ -42,9 +42,13 @@ class RailsMCPAdapter
         # Forward the JSON-RPC request to Rails
         response = forward_to_rails(request)
         
-        # Send response back to mcpo via stdout
-        STDOUT.puts response.to_json
-        STDOUT.flush
+        # Only send response if it's not a notification (notifications have no 'id')
+        if request['id']
+          STDOUT.puts response.to_json
+          STDOUT.flush
+        else
+          STDERR.puts "Skipping response for notification: #{request['method']}" if ENV['DEBUG']
+        end
       rescue JSON::ParserError => e
         STDERR.puts "Failed to parse JSON: #{e.message}"
         send_error_response(-32700, "Parse error: #{e.message}")
@@ -81,12 +85,18 @@ class RailsMCPAdapter
     
     case response
     when Net::HTTPSuccess
+      # Handle empty/null responses for notifications
+      if response.body.nil? || response.body.strip.empty? || response.body.strip == 'null'
+        STDERR.puts "Received null/empty response (likely a notification)" if ENV['DEBUG']
+        return nil
+      end
+      
       parsed = JSON.parse(response.body)
       
-      # Check if response is null or empty
+      # Check if response is null
       if parsed.nil?
         STDERR.puts "WARNING: Rails returned null response"
-        return error_response(-32603, "Server returned null")
+        return nil
       end
       
       parsed
