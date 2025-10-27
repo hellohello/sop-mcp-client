@@ -69,16 +69,33 @@ class RailsMCPAdapter
     post_request['Authorization'] = "Bearer #{@api_key}"
     post_request.body = request.to_json
     
+    STDERR.puts "=" * 50 if ENV['DEBUG']
+    STDERR.puts "Sending to: #{@api_uri}" if ENV['DEBUG']
+    STDERR.puts "Request body: #{request.to_json}" if ENV['DEBUG']
+    
     response = http.request(post_request)
+    
+    STDERR.puts "Response code: #{response.code}" if ENV['DEBUG']
+    STDERR.puts "Response body: #{response.body}" if ENV['DEBUG']
+    STDERR.puts "=" * 50 if ENV['DEBUG']
     
     case response
     when Net::HTTPSuccess
-      JSON.parse(response.body)
+      parsed = JSON.parse(response.body)
+      
+      # Check if response is null or empty
+      if parsed.nil?
+        STDERR.puts "WARNING: Rails returned null response"
+        return error_response(-32603, "Server returned null")
+      end
+      
+      parsed
     when Net::HTTPUnauthorized
       STDERR.puts "Authentication failed. Check your RAILS_API_KEY"
       error_response(-32000, "Authentication failed")
     else
       STDERR.puts "HTTP Error: #{response.code} - #{response.message}"
+      STDERR.puts "Response body: #{response.body}"
       error_response(-32000, "Server error: #{response.code}")
     end
   rescue Net::OpenTimeout, Net::ReadTimeout => e
@@ -87,8 +104,13 @@ class RailsMCPAdapter
   rescue SocketError, Errno::ECONNREFUSED => e
     STDERR.puts "Cannot connect to Rails app: #{e.message}"
     error_response(-32000, "Connection failed")
+  rescue JSON::ParserError => e
+    STDERR.puts "Failed to parse Rails response as JSON: #{e.message}"
+    STDERR.puts "Response body was: #{response.body}"
+    error_response(-32700, "Invalid JSON from server")
   rescue => e
     STDERR.puts "Unexpected error: #{e.message}"
+    STDERR.puts e.backtrace.join("\n") if ENV['DEBUG']
     error_response(-32603, "Internal error")
   end
 
